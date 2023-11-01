@@ -86,23 +86,35 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                 decoration: BoxDecoration(color: Colors.grey.withOpacity(0.4)),
                 child: Column(
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final image = await _controller.takePicture();
+                    Row(
+                      children: [
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final image = await _controller.takePicture();
 
-                          if (context.mounted) {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DisplayPictureScreen(imagePath: image.path),
-                                fullscreenDialog: true,
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('tap'),
-                      ),
+                              if (context.mounted) {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DisplayPictureScreen(imagePath: image.path),
+                                  ),
+                                );
+                              }
+                            },
+                            child: const Text('tap'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            child: const Text('dummy'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                      ],
                     ),
                   ],
                 ),
