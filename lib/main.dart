@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'extensions/extensions.dart';
 
@@ -12,7 +13,12 @@ Future<void> main() async {
 
   final firstCamera = cameras.first;
 
-  runApp(MyApp(camera: firstCamera));
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]).then((_) {
+    runApp(MyApp(camera: firstCamera));
+  });
 }
 
 /////////////////////////////////
@@ -72,22 +78,43 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Row(
           children: [
             Expanded(
               child: Container(
-                width: context.screenSize.width,
+                height: context.screenSize.height,
                 decoration: BoxDecoration(color: Colors.grey.withOpacity(0.4)),
-                child: Text('aaa'),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final image = await _controller.takePicture();
+
+                          if (context.mounted) {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => DisplayPictureScreen(imagePath: image.path),
+                                fullscreenDialog: true,
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text('tap'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             FutureBuilder<void>(
               future: _initializeControllerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return Container(
-                    width: context.screenSize.width,
-                    height: context.screenSize.height * 0.7,
+                  return SizedBox(
+                    width: context.screenSize.width * 0.7,
+                    height: context.screenSize.height,
                     child: CameraPreview(_controller),
                   );
                 } else {
@@ -97,19 +124,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final image = await _controller.takePicture();
-
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => DisplayPictureScreen(imagePath: image.path),
-              fullscreenDialog: true,
-            ),
-          );
-        },
-        child: const Icon(Icons.camera_alt),
       ),
     );
   }
